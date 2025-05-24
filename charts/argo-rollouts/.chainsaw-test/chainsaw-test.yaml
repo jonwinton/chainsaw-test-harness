@@ -1,0 +1,103 @@
+apiVersion: chainsaw.kyverno.io/v1alpha1
+kind: Test
+metadata:
+  name: rollout-controller-chainsaw
+spec:
+  steps:
+    - description: "provision resources"
+      try:
+        - apply:
+            file: ./resources.yaml
+
+        - wait:
+            apiVersion: apps/v1
+            kind: Deployment
+            name: (join('-', ['potato', (env('CHAINSAW_CONTEXT') || 'local')]))
+            timeout: 5m
+            for:
+              condition:
+                name: Completed
+                value: "true"
+        - wait:
+            apiVersion: apps/v1
+            kind: Deployment
+            name: (join('-', ['potato', (env('CHAINSAW_CONTEXT') || 'local')]))
+            timeout: 5m
+            for:
+              condition:
+                name: Healthy
+                value: "true"
+
+        - sleep:
+            duration: 3s
+
+    - description: "update rollout"
+      try:
+        - patch:
+            resource:
+              apiVersion: apps/v1
+              kind: Deployment
+              metadata:
+                name: (join('-', ['potato', (env('CHAINSAW_CONTEXT') || 'local')]))
+              spec:
+                template:
+                  spec:
+                    containers:
+                      - name: main
+                        image: docker.io/argoproj/rollouts-demo:green
+
+        - wait:
+            apiVersion: apps/v1
+            kind: Deployment
+            name: (join('-', ['potato', (env('CHAINSAW_CONTEXT') || 'local')]))
+            timeout: 5m
+            for:
+              condition:
+                name: Paused
+                value: "true"
+
+        - sleep:
+            duration: 5s
+
+        - script:
+            env:
+              - name: ROLLOUT_NAME
+                value: (join('-', ['potato', (env('CHAINSAW_CONTEXT') || 'local')]))
+              - name: NAMESPACE
+                value: ($namespace)
+            content: |
+              kubectl argo rollouts promote "$ROLLOUT_NAME" -n "$NAMESPACE"
+
+        - sleep:
+            duration: 5s
+
+        - wait:
+            apiVersion: apps/v1
+            kind: Deployment
+            name: (join('-', ['potato', (env('CHAINSAW_CONTEXT') || 'local')]))
+            timeout: 5m
+            for:
+              condition:
+                name: Completed
+                value: "true"
+        - wait:
+            apiVersion: apps/v1
+            kind: Deployment
+            name: (join('-', ['potato', (env('CHAINSAW_CONTEXT') || 'local')]))
+            timeout: 5m
+            for:
+              condition:
+                name: Healthy
+                value: "true"
+
+        - assert:
+            resource:
+              apiVersion: apps/v1
+              kind: Deployment
+              metadata:
+                name: (join('-', ['potato', (env('CHAINSAW_CONTEXT') || 'local')]))
+              status:
+                availableReplicas: 4
+                readyReplicas: 4
+                replicas: 4
+                updatedReplicas: 4

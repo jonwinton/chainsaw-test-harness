@@ -1,0 +1,3 @@
+# This is a utility chart that has no default values but the helpers do reference values from
+# the parent chart that can be used to modify behavior. The schema is described here but
+# commented out.

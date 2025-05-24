@@ -1,0 +1,12 @@
+apiVersion: v2
+type: application
+name: argo-rollouts
+version: 0.1.0
+description: Argo Rollouts is a Kubernetes progressive delivery controller
+dependencies:
+- name: argo-rollouts
+  version: 2.39.3
+  repository: https://argoproj.github.io/argo-helm
+- name: chainsaw-test
+  version: 0.1.0
+  repository: file://../chainsaw-test

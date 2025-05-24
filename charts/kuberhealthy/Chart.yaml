@@ -1,0 +1,9 @@
+apiVersion: v2
+type: application
+name: argo-rollouts
+version: 0.1.0
+description: Argo Rollouts is a Kubernetes progressive delivery controller
+dependencies:
+- name: kuberhealthy
+  version: 104
+  repository: https://kuberhealthy.github.io/kuberhealthy/helm-repos

@@ -1,0 +1,57 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: (join('-', ['potato-preview', (env('CHAINSAW_CONTEXT') || 'local')]))
+spec:
+  ports:
+    - port: 80
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app: (join('-', ['potato', (env('CHAINSAW_CONTEXT') || 'local')]))
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: (join('-', ['potato-active', (env('CHAINSAW_CONTEXT') || 'local')]))
+spec:
+  ports:
+    - port: 80
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app: (join('-', ['potato', (env('CHAINSAW_CONTEXT') || 'local')]))
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Rollout
+metadata:
+  name: (join('-', ['potato', (env('CHAINSAW_CONTEXT') || 'local')]))
+spec:
+  replicas: 4
+  strategy:
+    blueGreen:
+      activeService: (join('-', ['potato-active', (env('CHAINSAW_CONTEXT') || 'local')]))
+      previewService: (join('-', ['potato-preview', (env('CHAINSAW_CONTEXT') || 'local')]))
+      autoPromotionEnabled: false
+      scaleDownDelaySeconds: 1
+  selector:
+    matchLabels:
+      app: (join('-', ['potato', (env('CHAINSAW_CONTEXT') || 'local')]))
+  template:
+    metadata:
+      labels:
+        app: (join('-', ['potato', (env('CHAINSAW_CONTEXT') || 'local')]))
+    spec:
+      containers:
+        - name: main
+          image: docker.io/argoproj/rollouts-demo:blue
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          resources:
+            requests:
+              memory: 16Mi
+              cpu: 5m

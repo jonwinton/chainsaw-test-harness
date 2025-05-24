@@ -1,0 +1,32 @@
+{{- include "chainsaw-test.resources" . }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: argo-rollouts-chainsaw
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    helm.sh/hook-weight: "0"
+rules:
+  # The test needs to manage multiple resources in the namespace including
+  # Configmaps, Rollouts, Deployments, and Istio resources
+  - apiGroups: ["*"]
+    resources: ["*"]
+    verbs: ["*"]
+  - apiGroups: [""]
+    resources: ["namespaces"]
+    verbs: ["get", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: argo-rollouts-chainsaw-binding
+  namespace: {{ .Release.Namespace }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ include "chainsaw-test.serviceAccountName" . }}
+    namespace: {{ .Release.Namespace}}
+roleRef:
+  kind: Role
+  name: argo-rollouts-chainsaw
+  apiGroup: rbac.authorization.k8s.io

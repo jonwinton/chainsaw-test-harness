@@ -1,0 +1,73 @@
+# OS files
+.DS_Store
+Thumbs.db
+*.swp
+*~
+
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Go specific
+*.test
+*.out
+go.work
+go.work.sum
+vendor/
+
+# Dependency directories
+node_modules/
+
+# Log files
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Temp directories
+tmp/
+temp/
+.tmp/
+.temp/
+
+# IDE specific files
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+.project
+.classpath
+.settings/
+.metals/
+
+# Build outputs
+*.tar.gz
+*.tgz
+*.zip
+dist/
+build/
+
+# Kubernetes / Helm 
+.helm/
+**/charts/*.tgz
+charts/*/charts/
+charts/*/requirements.lock
+Chart.lock
+.kube/
+
+# Hermit
+.hermit/
+
+# Environment files
+.env
+.env.local
+.env.*
+
+# Test files
+.coverage
+coverage/

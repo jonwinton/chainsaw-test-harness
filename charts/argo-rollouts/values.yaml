@@ -1,0 +1,3 @@
+test:
+  kuberhealthy:
+    runInterval: 2m
